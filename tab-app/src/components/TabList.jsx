@@ -1,6 +1,6 @@
 import React, { useState, useRef, useLayoutEffect } from 'react';
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
-import Tab from './Tab.jsx';
+import Tab from './Tab';
 import SortableTab from './SortableTab';
 import TabDropdown from './TabDropdown';
 
@@ -12,6 +12,7 @@ function TabList({ tabs, activeTabId, onTabClick, onDeleteTabClick, onAddTabCLic
     const dummyRef = useRef(null);
     const systemTabRef = useRef(null);
     const addBtnRef = useRef(null);
+    const dropdownBtnRef = useRef(null);
 
     const systemTab = {
         id: 'system',
@@ -28,7 +29,7 @@ function TabList({ tabs, activeTabId, onTabClick, onDeleteTabClick, onAddTabCLic
             const addButtonWidth = addBtnRef.current?.getBoundingClientRect().width || 50;
             const moreButtonWidth = 48;
 
-            const safetyBuffer = 20;
+            const safetyBuffer = 2;
 
             const occupiedSpace = systemWidth + addButtonWidth + moreButtonWidth + safetyBuffer;
             const availableForTabs = containerWidth - occupiedSpace;
@@ -38,7 +39,12 @@ function TabList({ tabs, activeTabId, onTabClick, onDeleteTabClick, onAddTabCLic
             let count = 0;
 
             for (let i = 0; i < childNodes.length; i++) {
-                const tabWidth = childNodes[i].getBoundingClientRect().width;
+
+                const minTabWidth = 120;
+
+                const isPinned = tabs[i]?.isPinned;
+                const tabWidth = isPinned ? childNodes[i].getBoundingClientRect().width : minTabWidth;
+
                 if (currentWidth + tabWidth <= availableForTabs) {
                     currentWidth += tabWidth;
                     count++;
@@ -71,10 +77,9 @@ function TabList({ tabs, activeTabId, onTabClick, onDeleteTabClick, onAddTabCLic
 
             <div ref={dummyRef} className="absolute top-0 left-0 invisible pointer-events-none flex">
                 {tabs.map(tab => (
-                    <div key={tab.id} className="px-4 py-3 border-r border-t-[3px] whitespace-nowrap font-medium text-sm flex items-center box-border min-w-[120px] max-w-[200px]">
+                    <div key={tab.id} className="px-4 py-3 border-r border-t-[3px] whitespace-nowrap font-medium text-sm flex items-center box-border min-w-[120px]">
                         <span className="mr-2 w-5 h-5 block"></span>
                         <span>{tab.name}</span>
-                        {!tab.isPinned && <span className="ml-2 w-12 block"></span>}
                     </div>
                 ))}
             </div>
@@ -90,8 +95,7 @@ function TabList({ tabs, activeTabId, onTabClick, onDeleteTabClick, onAddTabCLic
                 />
             </div>
 
-
-            <div className="flex-shrink flex overflow-hidden relative">
+            <div className="flex overflow-hidden relative">
                 <SortableContext items={visibleTabs} strategy={horizontalListSortingStrategy}>
                     {visibleTabs.map((tab) => (
                         <SortableTab
@@ -106,25 +110,28 @@ function TabList({ tabs, activeTabId, onTabClick, onDeleteTabClick, onAddTabCLic
                 </SortableContext>
             </div>
 
-            <div className="flex-shrink-0 relative z-10 pl-1">
-                <TabDropdown
-                    hiddenTabs={hiddenTabs}
-                    onTabClick={onTabClick}
-                    activeTabId={activeTabId}
-                />
+            <div className="flex-shrink-0 flex items-center bg-gray-50 z-20">
+
+                <div ref={dropdownBtnRef} className={`${hiddenTabs.length === 0 ? 'opacity-0 pointer-events-none w-[48px]' : 'w-[48px]'} flex justify-center border-l border-gray-200 h-full py-2`}>
+                    <TabDropdown
+                        hiddenTabs={hiddenTabs}
+                        onTabClick={onTabClick}
+                        activeTabId={activeTabId}
+                    />
+                </div>
+
+                <button
+                    ref={addBtnRef}
+                    onClick={onAddTabCLick}
+                    className="flex items-center justify-center w-[48px] h-full border-l border-gray-200 text-gray-400 hover:bg-gray-100 hover:text-blue-500 transition-colors py-3"
+                >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                </button>
             </div>
 
-            <button
-                ref={addBtnRef}
-                onClick={onAddTabCLick}
-                className="flex-shrink-0 flex items-center justify-center px-4 h-full border-r border-l border-gray-200 text-gray-400 hover:bg-gray-100 hover:text-blue-500 transition-colors py-3 ml-auto"
-            >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-            </button>
-
-            <div className="flex-grow border-b border-gray-200 bg-gray-50 min-w-[1px]"></div>
+            <div className="flex-grow border-b border-gray-200 bg-gray-50 h-full min-h-[46px]"></div>
         </div>
     );
 }

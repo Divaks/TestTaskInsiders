@@ -3,28 +3,36 @@ import React from 'react';
 const Tab = ({ tab, isActive, onClick, onDelete, onPin }) => {
     const isSystem = tab.id === 'system';
 
+    const style = isSystem
+        ? {}
+        : { maxWidth: '240px', minWidth: '120px' };
+
     return (
         <div
             onClick={() => onClick(tab.id)}
             className={`
                 group relative flex items-center pl-4 pr-2 py-3 cursor-pointer select-none
-                border-r border-gray-200 border-t-[3px] transition-colors duration-150
+                border-r border-gray-200 border-t-[3px] transition-all duration-150
+                
+                // 🔥 flex-1: Це магія. Вкладки будуть рівномірно розтягуватись,
+                // заповнюючи пусте місце.
+                flex-1
                 
                 ${isActive
-                ? "bg-white border-t-blue-500 text-gray-800"
+                ? "bg-white border-t-blue-500 text-gray-800 z-10"
                 : "bg-gray-50 border-t-transparent text-gray-500 hover:bg-gray-100"
             }
                 
-                ${tab.isPinned ? "bg-gray-50/80" : ""}
+                ${tab.isPinned ? "bg-gray-50/80 flex-none min-w-fit max-w-fit" : ""}
             `}
-            style={{ maxWidth: '200px', minWidth: '120px' }}
+            style={style}
         >
 
             <div
                 className="flex items-center flex-grow overflow-hidden mr-1"
                 style={{
-                    maskImage: 'linear-gradient(to right, black 85%, transparent 100%)',
-                    WebkitMaskImage: 'linear-gradient(to right, black 85%, transparent 100%)'
+                    maskImage: 'linear-gradient(to right, black 80%, transparent 100%)',
+                    WebkitMaskImage: 'linear-gradient(to right, black 80%, transparent 100%)'
                 }}
             >
                 <div className={`flex-shrink-0 ${tab.name ? "mr-2" : ""} ${isActive ? "text-gray-700" : "text-gray-400 group-hover:text-gray-600"}`}>
@@ -53,7 +61,6 @@ const Tab = ({ tab, isActive, onClick, onDelete, onPin }) => {
                             : "text-gray-400 hover:text-gray-600"
                         }
                         `}
-                        title={tab.isPinned ? "Відкріпити" : "Закріпити"}
                     >
                         <svg className={`w-3.5 h-3.5 fill-current transition-transform duration-200 ${tab.isPinned ? "rotate-45" : ""}`} viewBox="0 0 24 24">
                             <path d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z" />
@@ -67,7 +74,6 @@ const Tab = ({ tab, isActive, onClick, onDelete, onPin }) => {
                                 onDelete(tab.id);
                             }}
                             className="p-1 rounded-full hover:bg-red-100 hover:text-red-600 text-gray-400 transition-all duration-200"
-                            title="Закрити вкладку"
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
