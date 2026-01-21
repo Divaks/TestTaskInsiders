@@ -5,7 +5,9 @@ import SortableTab from './SortableTab';
 import TabDropdown from './TabDropdown';
 
 function TabList({ tabs, activeTabId, onTabClick, onDeleteTabClick, onAddTabCLick, systemIcon, onPinTabClick }) {
-    const [visibleCount, setVisibleCount] = useState(tabs.length);
+
+    const [visibleCount, setVisibleCount] = useState(0);
+
     const containerRef = useRef(null);
     const dummyRef = useRef(null);
     const systemTabRef = useRef(null);
@@ -22,74 +24,66 @@ function TabList({ tabs, activeTabId, onTabClick, onDeleteTabClick, onAddTabCLic
             if (!containerRef.current || !dummyRef.current) return;
 
             const containerWidth = containerRef.current.offsetWidth;
+
             const systemWidth = systemTabRef.current?.getBoundingClientRect().width || 50;
             const addButtonWidth = addBtnRef.current?.getBoundingClientRect().width || 48;
-            const dropdownButtonWidth = 48;
 
-            const gapBuffer = 4;
 
-            const availableSpaceFull = containerWidth - systemWidth - addButtonWidth - gapBuffer;
+            const dropdownTriggerWidth = 48;
+
+            const SAFETY_BUFFER = 5;
+
+            const maxAvailableSpace = containerWidth - systemWidth - addButtonWidth - SAFETY_BUFFER;
 
             const childNodes = dummyRef.current.children;
-            let totalWidthRequired = 0;
+            const tabWidths = [];
 
-            const MIN_TAB_WIDTH = 120;
-            const MAX_TAB_WIDTH = 240;
+            let totalRequiredWidth = 0;
 
             for (let i = 0; i < childNodes.length; i++) {
+                const contentWidth = childNodes[i].getBoundingClientRect().width;
                 const isPinned = tabs[i]?.isPinned;
-                const realContentWidth = childNodes[i].getBoundingClientRect().width;
 
-                let effectiveWidth = isPinned
-                    ? realContentWidth
-                    : Math.max(realContentWidth, MIN_TAB_WIDTH);
+                const effectiveWidth = isPinned
+                    ? contentWidth
+                    : Math.max(contentWidth, 120);
 
-                if (!isPinned && effectiveWidth > MAX_TAB_WIDTH) {
-                    effectiveWidth = MAX_TAB_WIDTH;
-                }
-
-                totalWidthRequired += effectiveWidth;
+                tabWidths.push(effectiveWidth);
+                totalRequiredWidth += effectiveWidth;
             }
 
-            if (totalWidthRequired <= availableSpaceFull) {
+            if (totalRequiredWidth <= maxAvailableSpace) {
                 setVisibleCount(tabs.length);
                 return;
             }
 
-            const availableSpaceWithDropdown = availableSpaceFull - dropdownButtonWidth;
+            const spaceWithDropdown = maxAvailableSpace - dropdownTriggerWidth;
 
             let currentWidth = 0;
-            let visibleTabsCount = 0;
+            let visibleTabs = 0;
 
-            for (let i = 0; i < childNodes.length; i++) {
-                const isPinned = tabs[i]?.isPinned;
-                const realContentWidth = childNodes[i].getBoundingClientRect().width;
+            for (let i = 0; i < tabWidths.length; i++) {
+                const w = tabWidths[i];
 
-                let effectiveWidth = isPinned
-                    ? realContentWidth
-                    : Math.max(realContentWidth, MIN_TAB_WIDTH);
-
-                if (!isPinned && effectiveWidth > MAX_TAB_WIDTH) {
-                    effectiveWidth = MAX_TAB_WIDTH;
-                }
-
-                if (currentWidth + effectiveWidth <= availableSpaceWithDropdown) {
-                    currentWidth += effectiveWidth;
-                    visibleTabsCount++;
+                if (currentWidth + w <= spaceWithDropdown) {
+                    currentWidth += w;
+                    visibleTabs++;
                 } else {
                     break;
                 }
             }
 
-            setVisibleCount(Math.max(0, visibleTabsCount));
+            setVisibleCount(visibleTabs);
         };
 
         calculateVisibleTabs();
+
         const observer = new ResizeObserver(calculateVisibleTabs);
         if (containerRef.current) observer.observe(containerRef.current);
+
         return () => observer.disconnect();
 
-    }, [tabs]);
+    }, [tabs, systemIcon]);
 
     const visibleTabs = tabs.slice(0, visibleCount);
     const hiddenTabs = tabs.slice(visibleCount);
@@ -100,14 +94,15 @@ function TabList({ tabs, activeTabId, onTabClick, onDeleteTabClick, onAddTabCLic
 
             <div ref={dummyRef} className="absolute top-0 left-0 invisible pointer-events-none flex">
                 {tabs.map(tab => (
-                    <div key={tab.id} className="px-4 py-3 border border-transparent whitespace-nowrap font-medium text-sm flex items-center box-border">
-                        <span className="mr-2 w-5 h-5 block"></span>
+                    <div key={tab.id} className="pl-4 pr-2 py-3 border-r border-t-[3px] whitespace-nowrap font-medium text-sm flex items-center box-border">
+                        <div className="mr-2 w-5 h-5 inline-block"></div>
                         <span>{tab.name}</span>
+                        <div className="ml-2 w-6 h-6 inline-block"></div>
                     </div>
                 ))}
             </div>
 
-            <div ref={systemTabRef} className="flex-shrink-0 h-full">
+            <div ref={systemTabRef} className="flex-shrink-0 h-full z-30 bg-gray-50">
                 <Tab
                     key="system"
                     tab={systemTab}
@@ -135,10 +130,7 @@ function TabList({ tabs, activeTabId, onTabClick, onDeleteTabClick, onAddTabCLic
 
             <div className="flex-shrink-0 flex items-center bg-gray-50 h-full border-l border-gray-200 z-20">
 
-                <div className={`
-                    h-full flex items-center justify-center relative
-                    ${hasHiddenTabs ? 'block w-[48px]' : 'hidden w-0'}
-                `}>
+                <div className={`${hasHiddenTabs ? 'flex' : 'hidden'} w-[48px] h-full items-center justify-center relative`}>
                     <TabDropdown
                         hiddenTabs={hiddenTabs}
                         onTabClick={onTabClick}
