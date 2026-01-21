@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import Tab from './Tab';
+import Tab from './Tab.jsx';
 
 export default function SortableTab({ tab, isActive, onClick, onDelete, onPin }) {
     const {

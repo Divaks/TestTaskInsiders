@@ -6,12 +6,12 @@ export default function TabDropdown({ hiddenTabs, onTabClick, activeTabId }) {
 
     useEffect(() => {
         function handleClickOutside(event){
-            if (menuRef.current && menuRef.current.contains(event.target)) {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
                 setIsOpen(false);
             }
         }
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+        document.addEventListener('pointerdown', handleClickOutside, { capture: true });
+        return () => document.removeEventListener('pointerdown', handleClickOutside, { capture: true });
     },[]);
 
     if (hiddenTabs.length === 0) return null;
@@ -21,7 +21,10 @@ export default function TabDropdown({ hiddenTabs, onTabClick, activeTabId }) {
     return (
         <div className="relative h-full flex items-center" ref={menuRef}>
             <button
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    setIsOpen(!isOpen);
+                }}
                 className={`
                     flex items-center justify-center px-3 py-2 mx-1 rounded-md
                     transition-colors duration-200
@@ -40,7 +43,8 @@ export default function TabDropdown({ hiddenTabs, onTabClick, activeTabId }) {
                     {hiddenTabs.map(tab => (
                         <div
                             key={tab.id}
-                            onClick={() => {
+                            onClick={(e) => {
+                                e.stopPropagation();
                                 onTabClick(tab.id);
                                 setIsOpen(false);
                             }}
