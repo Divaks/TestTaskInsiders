@@ -1,60 +1,51 @@
-function TabList({tabs, onTabClick, onDeleteTabClick}) {
+import React from 'react';
+import Tab from './Tab';
+
+const SystemIcon = <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>;
+
+function TabList({ tabs, activeTabId, onTabClick, onDeleteTabClick, onAddTabCLick }) {
+
+    const systemTab = { id: 'system', name: "", icon: SystemIcon };
+
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+        <div className="flex w-full bg-gray-50 border-b border-gray-200 overflow-x-auto">
+
+            <Tab
+                key="system"
+                tab={systemTab}
+                isActive={activeTabId === 'system'}
+                onClick={onTabClick}
+                onDelete={() => {}}
+            />
+
             {tabs.map((tab) => (
-                <div
+                <Tab
                     key={tab.id}
-                    onClick={() => onTabClick(tab)}
-                    className="group relative overflow-hidden
-            bg-zinc-900/80 backdrop-blur-sm             // Напівпрозорий фон
-            border border-zinc-800/50 rounded-2xl       // Тонкий бордер
-            p-6
-            cursor-pointer
-            transition-all duration-300 ease-out        // Плавна анімація
-            hover:-translate-y-1                        // Картка 'спливає' вверх
-            hover:shadow-2xl hover:shadow-red-900/20    // Тінь з червоним відтінком
-            hover:border-red-500/30"                    // Бордер стає червоним
-                >
-                    {/* Декоративний градієнт на фоні при ховері */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-red-600/0 via-red-600/0 to-red-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                    <div className="relative flex justify-between items-start z-10">
-                        <div>
-                            {/* ID або Label (маленький текст зверху) */}
-                            <span className="text-xs font-mono text-zinc-500 mb-2 block group-hover:text-red-400 transition-colors">
-                        #{tab.id.toString().padStart(2, '0')}
-                    </span>
-
-                            {/* Заголовок з градієнтом */}
-                            <h3 className="text-2xl font-bold text-zinc-100 tracking-tight group-hover:text-white">
-                                {tab.name}
-                            </h3>
-                        </div>
-
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onDeleteTabClick(tab.id);
-                            }}
-                            className="
-                    flex items-center gap-2
-                    px-4 py-1.5
-                    rounded-full
-                    text-xs font-medium tracking-wide uppercase
-                    text-zinc-400 bg-zinc-800/50
-                    border border-zinc-700/50
-                    opacity-0 translate-x-4                // Приховано і зміщено вправо
-                    group-hover:opacity-100 group-hover:translate-x-0 // Виїжджає при наведенні
-                    transition-all duration-300 delay-75
-                    hover:!bg-red-600 hover:!text-white hover:!border-red-500 hover:shadow-lg hover:shadow-red-600/20"
-                        >
-                            Видалити
-                        </button>
-                    </div>
-                </div>
+                    tab={tab}
+                    isActive={activeTabId === tab.id}
+                    onClick={onTabClick}
+                    onDelete={onDeleteTabClick}
+                />
             ))}
+
+            <button
+                onClick={onAddTabCLick}
+                className="
+                    flex items-center justify-center px-4
+                    border-r border-b border-gray-200
+                    text-gray-400 hover:bg-gray-100 hover:text-blue-500
+                    transition-colors
+                "
+                title="Додати вкладку"
+            >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+            </button>
+
+            <div className="flex-grow border-b border-gray-200 bg-gray-50"></div>
         </div>
-    )
+    );
 }
 
 export default TabList;
