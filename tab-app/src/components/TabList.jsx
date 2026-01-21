@@ -1,5 +1,7 @@
 import React from 'react';
+import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import Tab from './Tab';
+import SortableTab from './SortableTab';
 
 const SystemIcon = <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>;
 
@@ -18,30 +20,31 @@ function TabList({ tabs, activeTabId, onTabClick, onDeleteTabClick, onAddTabCLic
                 onDelete={() => {}}
             />
 
-            {tabs.map((tab) => (
-                <Tab
-                    key={tab.id}
-                    tab={tab}
-                    isActive={activeTabId === tab.id}
-                    onClick={onTabClick}
-                    onDelete={onDeleteTabClick}
-                />
-            ))}
+            <SortableContext
+                items={tabs}
+                strategy={horizontalListSortingStrategy}
+            >
+                {tabs.map((tab) => (
+                    <SortableTab
+                        key={tab.id}
+                        tab={tab}
+                        isActive={activeTabId === tab.id}
+                        onClick={onTabClick}
+                        onDelete={onDeleteTabClick}
+                    />
+                ))}
+            </SortableContext>
 
             <button
                 onClick={onAddTabCLick}
-                className="
-                    flex items-center justify-center px-4
-                    border-r border-b border-gray-200
-                    text-gray-400 hover:bg-gray-100 hover:text-blue-500
-                    transition-colors
-                "
-                title="Додати вкладку"
+                className="flex items-center justify-center px-4 h-full border-r border-gray-200 text-gray-400 hover:bg-gray-100 hover:text-blue-500 transition-colors py-3"
             >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
             </button>
+
+            <div className="flex-grow border-b border-gray-200 bg-gray-50"></div>
 
             <div className="flex-grow border-b border-gray-200 bg-gray-50"></div>
         </div>

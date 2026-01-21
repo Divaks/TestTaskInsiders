@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import TabList from './components/TabList';
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import { arrayMove } from '@dnd-kit/sortable';
 
 const Icons = {
     Box: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>,
@@ -45,18 +47,36 @@ export default function App() {
         ? { id: 'system', name: "System Home" }
         : tabs.find(t => t.id === activeTabId);
 
+    const handleDragEnd = (event) => {
+        const { active, over } = event;
+
+        if (active.id !== over.id) {
+            setTabs((items) => {
+                const oldIndex = items.findIndex((t) => t.id === active.id);
+                const newIndex = items.findIndex((t) => t.id === over.id);
+
+                return arrayMove(items, oldIndex, newIndex);
+            });
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-100 p-8 font-sans">
-
             <div className="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-200 min-h-[500px] flex flex-col">
 
-                <TabList
-                    tabs={tabs}
-                    activeTabId={activeTabId}
-                    onTabClick={handleTabClick}
-                    onDeleteTabClick={handleDeleteTab}
-                    onAddTabCLick={handleAddTab}
-                />
+                <DndContext
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                >
+                    <TabList
+                        tabs={tabs}
+                        activeTabId={activeTabId}
+                        onTabClick={handleTabClick}
+                        onDeleteTabClick={handleDeleteTab}
+                        onAddTabCLick={handleAddTab}
+                        systemIcon={Icons.Home}
+                    />
+                </DndContext>
 
                 <div className="flex-grow p-8 bg-white">
                     {activeTab ? (
