@@ -3,7 +3,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import Tab from './Tab';
 
-export default function SortableTab({ tab, isActive, onClick, onDelete }) {
+export default function SortableTab({ tab, isActive, onClick, onDelete, onPin }) {
     const {
         attributes,
         listeners,
@@ -25,12 +25,14 @@ export default function SortableTab({ tab, isActive, onClick, onDelete }) {
             style={style}
             {...attributes}
             {...listeners}
+            className="h-full"
         >
             <Tab
                 tab={tab}
                 isActive={isActive}
                 onClick={onClick}
                 onDelete={onDelete}
+                onPin={onPin}
             />
         </div>
     );
